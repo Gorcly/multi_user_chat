@@ -1,0 +1,40 @@
+# build output
+server_app
+client_app
+*.o
+*.a
+*.so
+*.dll
+*.exe
+*.pdb
+
+# runtime data
+data/*.db
+downloads/
+sample.txt
+*.log
+tmp/
+*.tmp
+
+# test output
+test/*.log
+test/tmp/
+coverage/
+*.gcda
+*.gcno
+*.gcov
+
+# Tauri / frontend
+node_modules/
+dist/
+build/
+.vite/
+src-tauri/target/
+desktop/node_modules/
+desktop/dist/
+desktop/src-tauri/target/
+
+# editor / system
+.vscode/
+.idea/
+.DS_Store
