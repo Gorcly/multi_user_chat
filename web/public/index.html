@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>多用户聊天系统 Web 控制台</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="sidebar">
+        <h1>多用户聊天系统</h1>
+        <p class="muted">WSL Web 版控制台</p>
+
+        <label>
+          服务器地址
+          <input id="host" value="127.0.0.1" />
+        </label>
+        <label>
+          TCP 端口
+          <input id="tcpPort" type="number" value="9000" />
+        </label>
+        <label>
+          UDP 广播端口
+          <input id="udpPort" type="number" value="9001" />
+        </label>
+
+        <div class="button-grid">
+          <button id="checkBtn">检查网关</button>
+          <button id="connectTcpBtn">连接 TCP</button>
+          <button id="disconnectTcpBtn">断开 TCP</button>
+          <button id="listenUdpBtn">监听 UDP</button>
+        </div>
+
+        <hr />
+
+        <label>
+          用户名
+          <input id="username" placeholder="user1" />
+        </label>
+        <label>
+          密码
+          <input id="password" type="password" placeholder="pw1" />
+        </label>
+
+        <div class="button-grid">
+          <button disabled>注册（待接协议）</button>
+          <button disabled>登录（待接协议）</button>
+        </div>
+      </section>
+
+      <section class="content">
+        <header class="toolbar">
+          <strong>运行日志</strong>
+          <span id="status" class="status offline">未连接</span>
+        </header>
+        <div id="log" class="log"></div>
+      </section>
+    </main>
+
+    <script src="/main.js" type="module"></script>
+  </body>
+</html>
