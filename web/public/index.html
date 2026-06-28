@@ -3,59 +3,120 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>多用户聊天系统 Web 控制台</title>
+    <title>Linux 聊天室 - 多用户网络通信系统</title>
     <link rel="stylesheet" href="/style.css" />
   </head>
   <body>
     <main class="app-shell">
-      <section class="sidebar">
-        <h1>多用户聊天系统</h1>
-        <p class="muted">WSL Web 版控制台</p>
+      <section id="authView" class="auth-layout">
+        <form id="authForm" class="auth-panel">
+          <div class="auth-brand">
+            <span class="app-logo">●</span>
+            <div>
+              <h1>Linux 聊天室</h1>
+            </div>
+          </div>
 
-        <label>
-          服务器地址
-          <input id="host" value="127.0.0.1" />
-        </label>
-        <label>
-          TCP 端口
-          <input id="tcpPort" type="number" value="9000" />
-        </label>
-        <label>
-          UDP 广播端口
-          <input id="udpPort" type="number" value="9001" />
-        </label>
+          <label>
+            用户名
+            <input id="username" maxlength="31" autocomplete="username" />
+          </label>
+          <label>
+            密码
+            <input id="password" maxlength="63" type="password" autocomplete="current-password" />
+          </label>
 
-        <div class="button-grid">
-          <button id="checkBtn">检查网关</button>
-          <button id="connectTcpBtn">连接 TCP</button>
-          <button id="disconnectTcpBtn">断开 TCP</button>
-          <button id="listenUdpBtn">监听 UDP</button>
-        </div>
-
-        <hr />
-
-        <label>
-          用户名
-          <input id="username" placeholder="user1" />
-        </label>
-        <label>
-          密码
-          <input id="password" type="password" placeholder="pw1" />
-        </label>
-
-        <div class="button-grid">
-          <button disabled>注册（待接协议）</button>
-          <button disabled>登录（待接协议）</button>
-        </div>
+          <div class="button-row">
+            <button id="loginBtn" type="submit">登录</button>
+            <button id="registerBtn" class="secondary" type="button">注册</button>
+          </div>s
+        </form>
       </section>
 
-      <section class="content">
-        <header class="toolbar">
-          <strong>运行日志</strong>
-          <span id="status" class="status offline">未连接</span>
-        </header>
-        <div id="log" class="log"></div>
+      <section id="chatView" class="chat-layout" hidden>
+        <aside class="sidebar">
+          <div class="sidebar-brand">
+            <span class="app-logo small">●</span>
+            <div>
+              <strong>Linux 聊天室</strong>
+              <span>网络通信项目</span>
+            </div>
+          </div>
+
+          <label class="search-box" aria-label="搜索好友或群组">
+            <span>⌕</span>
+            <input id="contactSearch" autocomplete="off" placeholder="搜索好友或群组..." />
+            <kbd>Ctrl+F</kbd>
+          </label>
+
+          <div class="list-tabs" role="tablist" aria-label="联系人列表切换">
+            <button id="friendTab" type="button" class="active" role="tab" aria-selected="true">好友列表</button>
+            <button id="groupTab" type="button" role="tab" aria-selected="false">群组列表</button>
+          </div>
+
+          <button id="newGroupBtn" class="new-group-button" type="button" hidden>＋ 新建群聊</button>
+
+          <div id="rosterList" class="roster-list" aria-live="polite"></div>
+
+          <nav class="side-nav" aria-label="底部导航">
+            <button id="navFriends" class="nav-button active" type="button" title="好友列表" aria-label="好友列表">♙</button>
+            <button id="navGroups" class="nav-button" type="button" title="群组列表" aria-label="群组列表">♚</button>
+            <button id="logoutBtn" class="nav-button" type="button" title="退出登录" aria-label="退出登录">⚙</button>
+          </nav>
+        </aside>
+
+        <section class="workspace">
+          <header class="chat-header">
+            <div>
+              <div class="target-line">
+                <h2 id="chatTargetName">群聊</h2>
+                <span id="targetDot" class="presence-dot online"></span>
+              </div>
+              <p id="connectionStatus">未连接</p>
+            </div>
+            <div class="utility-icons" aria-label="聊天工具">
+              <span id="currentUser" class="current-user-chip">未登录</span>
+              <button type="button" title="聊天信息" aria-label="聊天信息">i</button>
+              <button type="button" title="更多" aria-label="更多">···</button>
+            </div>
+          </header>
+
+          <section id="messageFeed" class="message-feed" aria-live="polite">
+            <div class="date-divider">今天</div>
+          </section>
+
+          <div id="systemFeed" class="toast-stack" aria-live="polite"></div>
+
+          <form id="composerForm" class="composer">
+            <div id="filePreview" class="file-preview" hidden></div>
+            <div class="composer-row">
+              <button id="attachBtn" class="attach-button" type="button" title="选择文件" aria-label="选择文件">⌘</button>
+              <input id="fileInput" type="file" hidden />
+              <textarea id="messageInput" rows="1" maxlength="1023" placeholder="输入消息...（Enter 发送，Ctrl+Enter 换行）"></textarea>
+              <button id="sendBtn" class="send-button" type="submit">➤ 发送</button>
+            </div>
+          </form>
+        </section>
       </section>
+
+      <dialog id="groupDialog" class="group-dialog">
+        <form id="groupForm" method="dialog">
+          <header>
+            <strong>新建群聊</strong>
+            <button id="closeGroupDialogBtn" type="button" aria-label="关闭">×</button>
+          </header>
+          <label>
+            群名
+            <input id="groupNameInput" maxlength="63" autocomplete="off" />
+          </label>
+          <div id="groupMemberList" class="group-member-list" aria-live="polite"></div>
+          <p id="groupFormMessage" class="form-message" role="status"></p>
+          <div class="button-row">
+            <button id="createGroupBtn" type="submit">创建</button>
+            <button id="cancelGroupBtn" class="secondary" type="button">取消</button>
+          </div>
+        </form>
+      </dialog>
     </main>
 
     <script src="/main.js" type="module"></script>
