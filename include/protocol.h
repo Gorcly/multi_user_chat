@@ -9,6 +9,12 @@
 #define FILE_NAME_MAX_LEN 256
 #define PACKET_DATA_MAX 1024
 #define FILE_TRANSFER_MAX_BYTES (10 * 1024 * 1024)
+#define GROUP_ID_MAX_LEN 32
+#define GROUP_NAME_MAX_LEN 64
+#define GROUP_MAX_MEMBERS 64
+#define GROUP_MAX_GROUPS 128
+#define GROUP_EVENT_MAX_CHANGES 64
+#define GROUP_PAYLOAD_MAX_FIELDS 128
 
 typedef enum MessageType {
     MSG_REGISTER = 1,
@@ -23,7 +29,11 @@ typedef enum MessageType {
     MSG_HEARTBEAT = 10,
     MSG_BROADCAST = 11,
     MSG_OK = 12,
-    MSG_ERROR = 13
+    MSG_ERROR = 13,
+    MSG_GROUP_CREATE = 14,
+    MSG_GROUP_LIST = 15,
+    MSG_GROUP_MESSAGE = 16,
+    MSG_GROUP_EVENT = 17
 } MessageType;
 
 typedef struct Packet {

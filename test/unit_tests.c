@@ -1,5 +1,6 @@
 #include "crypto_utils.h"
 #include "file_utils.h"
+#include "group.h"
 #include "message_queue.h"
 #include "protocol.h"
 #include "user.h"
@@ -184,6 +185,79 @@ static void test_file_save_path_avoids_conflict(void) {
     ASSERT_TRUE(strstr(path2, "alice_note") != NULL);
 }
 
+static void test_group_payload_round_trip(void) {
+    GroupPayload payload;
+    GroupFields fields;
+
+    ASSERT_EQ_INT(group_payload_init(&payload), 0);
+    ASSERT_EQ_INT(group_payload_add(&payload, "created"), 0);
+    ASSERT_EQ_INT(group_payload_add(&payload, "g000001"), 0);
+    ASSERT_EQ_INT(group_payload_add(&payload, "项目组"), 0);
+    ASSERT_EQ_INT(group_payload_parse(payload.data, payload.length, &fields), 0);
+    ASSERT_EQ_INT((int)fields.count, 3);
+    ASSERT_STREQ(fields.values[0], "created");
+    ASSERT_STREQ(fields.values[1], "g000001");
+    ASSERT_STREQ(fields.values[2], "项目组");
+}
+
+static void test_group_store_create_and_list(void) {
+    GroupStore store;
+    GroupSnapshot snapshot;
+    GroupPayload payload;
+    GroupFields fields;
+    const char *members[] = {"bob", "carol", "bob"};
+
+    ASSERT_EQ_INT(group_store_init(&store), 0);
+    ASSERT_EQ_INT(group_store_create(&store, "alice", "项目组", members, 3,
+                                     &snapshot),
+                  GROUP_OK);
+    ASSERT_STREQ(snapshot.id, "g000001");
+    ASSERT_STREQ(snapshot.name, "项目组");
+    ASSERT_EQ_INT((int)snapshot.member_count, 3);
+    ASSERT_TRUE(group_snapshot_has_member(&snapshot, "alice"));
+    ASSERT_TRUE(group_snapshot_has_member(&snapshot, "bob"));
+    ASSERT_TRUE(group_snapshot_has_member(&snapshot, "carol"));
+
+    ASSERT_EQ_INT(group_store_build_list_payload(&store, "bob", &payload),
+                  GROUP_OK);
+    ASSERT_EQ_INT(group_payload_parse(payload.data, payload.length, &fields), 0);
+    ASSERT_STREQ(fields.values[0], "1");
+    ASSERT_STREQ(fields.values[1], "g000001");
+    ASSERT_STREQ(fields.values[2], "项目组");
+    ASSERT_STREQ(fields.values[4], "3");
+
+    group_store_destroy(&store);
+}
+
+static void test_group_store_remove_member_and_delete_empty(void) {
+    GroupStore store;
+    GroupSnapshot snapshot;
+    GroupChange changes[4];
+    size_t change_count = 0;
+    const char *members[] = {"bob"};
+
+    ASSERT_EQ_INT(group_store_init(&store), 0);
+    ASSERT_EQ_INT(group_store_create(&store, "alice", "临时群", members, 1,
+                                     &snapshot),
+                  GROUP_OK);
+    ASSERT_EQ_INT(group_store_remove_member(&store, "bob", changes, 4,
+                                            &change_count),
+                  GROUP_OK);
+    ASSERT_EQ_INT((int)change_count, 1);
+    ASSERT_STREQ(changes[0].event, GROUP_EVENT_MEMBER_LEFT);
+    ASSERT_TRUE(group_snapshot_has_member(&changes[0].group, "alice"));
+    ASSERT_TRUE(!group_snapshot_has_member(&changes[0].group, "bob"));
+
+    ASSERT_EQ_INT(group_store_remove_member(&store, "alice", changes, 4,
+                                            &change_count),
+                  GROUP_OK);
+    ASSERT_EQ_INT((int)change_count, 0);
+    ASSERT_EQ_INT(group_store_get_snapshot(&store, "g000001", &snapshot),
+                  GROUP_ERR_NOT_FOUND);
+
+    group_store_destroy(&store);
+}
+
 int main(void) {
     ASSERT_EQ_INT(ensure_directory("test/tmp"), 0);
 
@@ -193,6 +267,9 @@ int main(void) {
     test_crypto_hash_and_verify();
     test_user_store_persistence_and_online_state();
     test_file_save_path_avoids_conflict();
+    test_group_payload_round_trip();
+    test_group_store_create_and_list();
+    test_group_store_remove_member_and_delete_empty();
 
     puts("unit tests passed");
     return 0;

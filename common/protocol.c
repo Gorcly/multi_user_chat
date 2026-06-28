@@ -132,6 +132,14 @@ const char *message_type_name(int type) {
         return "OK";
     case MSG_ERROR:
         return "ERROR";
+    case MSG_GROUP_CREATE:
+        return "GROUP_CREATE";
+    case MSG_GROUP_LIST:
+        return "GROUP_LIST";
+    case MSG_GROUP_MESSAGE:
+        return "GROUP_MESSAGE";
+    case MSG_GROUP_EVENT:
+        return "GROUP_EVENT";
     default:
         return "UNKNOWN";
     }

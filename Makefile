@@ -11,6 +11,7 @@ COMMON_SRC = \
 	common/net_utils.c \
 	common/crypto_utils.c \
 	common/user.c \
+	common/group.c \
 	common/message_queue.c \
 	common/file_utils.c
 
